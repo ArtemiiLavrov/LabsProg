@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualBasic;
+using Microsoft.VisualBasic;
 using System.Collections.Concurrent;
 using System.Text;
 
@@ -22,7 +22,7 @@ namespace lab5
                 Console.WriteLine();
                 isConvert = int.TryParse(inputStr, out length);
                 if (!isConvert || length < 0)
-                    Console.WriteLine("Ошибка! Повторите ввод.\n");
+                    BdCmplt("Ошибка! Повторите ввод.\n");
             } while (!isConvert || length < 0);
             return length;
         }
@@ -43,7 +43,7 @@ namespace lab5
                 isConvert = int.TryParse(inputStr, out number);
                 if (!isConvert)
                 {
-                    BdCmplt("Ошибка! Такого пункта меню не существует.");
+                    BdCmplt("Ошибка! Такого пункта меню не существует.\n");
                 }
             } while (!isConvert);
             return number;
@@ -149,7 +149,7 @@ namespace lab5
                 GdCmplt(str);
             }
         }
-        static int[] AddLmnts(ref int[] array)
+        static int[] ManualAddNLmnts(ref int[] array)
         {
             int nNumber = 0, kNumber = 0;
             Console.WriteLine("Введите количество элементов, которые должны быть добавлены");
@@ -187,7 +187,62 @@ namespace lab5
             for (int i = kNumber - 1; i < nNumber + kNumber - 1; i++) //этим циклом добавляем в массив элементы, вводимые пользователем
             {
                 Console.WriteLine($"Введите целочисленный элемент массива номер {i + 1}");
-                newArray[i] = GetNumber();
+                int value = GetNumber();
+                newArray[i] = value;
+            }
+            int j = 0;
+            for (int z = 0; z < kNumber - 1; z++) //этим циклом добавляем в массив элементы, которые стоят на позициях до вводимых
+            {
+                newArray[z] = array[j++];
+            }
+            for (int z = kNumber + nNumber - 1; z < array.Length + nNumber; z++) //этим циклом добавляем в массив элементы, которые стоят на позициях после вводимых
+            {
+                newArray[z] = array[j++];
+            }
+            array = newArray;
+            return array;
+
+        }
+        static int[] AutoAddNLmnts(ref int[] array)
+        {
+            int nNumber = 0, kNumber = 0;
+            Console.WriteLine("Введите количество элементов, которые должны быть добавлены");
+            nNumber = GetNumber();
+            while (nNumber < 1)
+            {
+                BdCmplt("Нельзя добавить неположительное количество элементов.\nПовторите ввод.");
+                nNumber = GetNumber();
+            }
+            if (nNumber == 0)
+            {
+                Console.Clear();
+                BdCmplt("Массив остаётся прежним. Ни один элемент не подлежит добавлению.\n");
+            }
+            else if (nNumber == 1)
+            {
+                Console.WriteLine($"Введите номер элемента, начиная с которого будет добавлен {nNumber} последующий");
+                kNumber = GetIndex();
+            }
+            else
+            {
+                Console.WriteLine($"Введите номер элемента, начиная с которого будут добавлены {nNumber} последующих");
+                kNumber = GetIndex();
+
+            }
+            if (kNumber > array.Length + 1 || kNumber < 1)
+            {
+                do
+                {
+                    BdCmplt("\nВведите индекс ещё раз. Индекс не соответствует размеру массива.");
+                    kNumber = GetIndex();
+                } while (kNumber > array.Length + 1 || kNumber < 1);
+            }
+            int[] newArray = new int[array.Length + nNumber];
+            for (int i = kNumber - 1; i < nNumber + kNumber - 1; i++) //этим циклом добавляем в массив элементы, вводимые пользователем
+            {
+                Random rnd = new Random();
+                int value = rnd.Next(0, 100);
+                newArray[i] = value;
             }
             int j = 0;
             for (int z = 0; z < kNumber - 1; z++) //этим циклом добавляем в массив элементы, которые стоят на позициях до вводимых
@@ -344,7 +399,8 @@ namespace lab5
                     for (j = 0; j < columns; j++)
                     {
                         Console.WriteLine($"Введите элемент [{i + 1},{j + 1}]");
-                        array[i, j] = GetNumber();
+                        int value = GetNumber();
+                        array[i, j] = value;
                     }
                 }
                 return array;
@@ -383,7 +439,7 @@ namespace lab5
                     array[i] = new int[columns];
                     for (int j = 0; j < columns; j++)
                     {
-                        Console.WriteLine($"Введите элемент [{i + 1}][{j + 1}]");
+                        Console.WriteLine($"Введите элемент [{i + 1},{j + 1}]");
                         int value = GetNumber();
                         array[i][j] = value;
                     }
@@ -391,7 +447,7 @@ namespace lab5
                 return array;
             }
         }
-        static int[,] DelEvenStr(ref int[,] array) 
+        static int[,] DelEvenStr(ref int[,] array)  
         {
             if (array.Length == 0)
             {
@@ -591,12 +647,41 @@ namespace lab5
                                         break;
                                     case 2:
                                         {
-                                            AddLmnts(ref oneDimensArr);
-                                            PrintArray(oneDimensArr);
+                                            do
+                                            {
+                                                InputSelectMenu();
+                                                ans = Answer();
+                                                switch (ans)
+                                                {
+                                                    case 1:
+                                                        {
+                                                            ManualAddNLmnts(ref oneDimensArr);
+                                                            PrintArray(oneDimensArr);
+                                                            break;
+                                                        }
+                                                    case 2:
+                                                        {
+                                                            AutoAddNLmnts(ref oneDimensArr);
+                                                            PrintArray(oneDimensArr);
+                                                            break;
+                                                        }
+                                                    case 3:
+                                                        {
+                                                            Console.Clear();
+                                                            break;
+                                                        }
+                                                    default:
+                                                        {
+                                                            Console.Clear();
+                                                            BdCmplt("Нет такого пункта меню.\nПовторите попытку ввода.");
+                                                            break;
+                                                        }
+                                                }
+                                            } while (ans != 3);
                                             break;
                                         }
                                     case 3:
-                                        {
+                                        {   
                                             Console.Clear();
                                             break;
                                         }
