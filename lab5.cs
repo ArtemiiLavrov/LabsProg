@@ -21,9 +21,9 @@ namespace lab5
                 inputStr = Console.ReadLine();
                 Console.WriteLine();
                 isConvert = int.TryParse(inputStr, out length);
-                if (!isConvert || length < 0)
+                if (!isConvert || length < 0 || length > 2147483591)
                     BdCmplt("Ошибка! Повторите ввод.\n");
-            } while (!isConvert || length < 0);
+            } while (!isConvert || length < 0 || length > 2147483591);
             return length;
         }
         /// <summary>
@@ -125,7 +125,12 @@ namespace lab5
         }
         static void PrintArray(int[][] array)
         {
-            if (array.Length==0)
+            int wholeLen = 0;
+            for (int k = 0; k < array.Length; k++)
+            {
+                wholeLen += array[k].Length;
+            }
+            if (wholeLen==0)
             {
                 BdCmplt("Массив пуст\n");
             }
@@ -136,14 +141,32 @@ namespace lab5
                 {
                     sb.Append("[");
                     int g = 0;
-                    for (int j = 0; j < array[i].Length-1; j++)
+                    if (array[i].Length==1)
                     {
-                        sb.Append(array[i][j] + " ");
-                        g++;
+                        for (int j = 0; j < array[i].Length; j++)
+                        {
+                            sb.Append(array[i][j]);
+                        }
                     }
-                    sb.Append(array[i][g]);
-                    sb.Append("]");
-                    sb.Append("\n");
+                    else
+                    {
+                        for (int j = 0; j < array[i].Length-1; j++)
+                        {
+                            sb.Append(array[i][j] + " ");
+                            g++;
+                        }
+                    }
+                    if (g == 0)
+                    {
+                        sb.Append("]\n");
+                    }
+                    
+                    else
+                    {
+                        sb.Append(array[i][g]);
+                        sb.Append("]");
+                        sb.Append("\n");
+                    }
                 }
                 string str = sb.ToString();
                 GdCmplt(str);
@@ -151,18 +174,25 @@ namespace lab5
         }
         static int[] ManualAddNLmnts(ref int[] array)
         {
-            int nNumber = 0, kNumber = 0;
+            int nNumber, kNumber = 0;
+            double f = array.Length;
             Console.WriteLine("Введите количество элементов, которые должны быть добавлены");
             nNumber = GetNumber();
-            while (nNumber < 1)
+            while (nNumber < 0)
             {
-                BdCmplt("Нельзя добавить неположительное количество элементов.\nПовторите ввод.");
+                BdCmplt("Нельзя добавить отрицательное количество элементов.\nПовторите ввод.");
+                nNumber = GetNumber();
+            }
+            while ((double) nNumber + f > 2147483591.0)
+            {
+                BdCmplt("Число элементов, которые будут в массиве после добавления, превышает допустимое\nПовторите ввод.");
                 nNumber = GetNumber();
             }
             if (nNumber == 0)
             {
                 Console.Clear();
                 BdCmplt("Массив остаётся прежним. Ни один элемент не подлежит добавлению.\n");
+                return array;
             }
             else if (nNumber == 1)
             {
@@ -205,18 +235,25 @@ namespace lab5
         }
         static int[] AutoAddNLmnts(ref int[] array)
         {
-            int nNumber = 0, kNumber = 0;
+            int nNumber, kNumber = 0;
+            double f = array.Length;
             Console.WriteLine("Введите количество элементов, которые должны быть добавлены");
             nNumber = GetNumber();
-            while (nNumber < 1)
+            while (nNumber < 0)
             {
                 BdCmplt("Нельзя добавить неположительное количество элементов.\nПовторите ввод.");
+                nNumber = GetNumber();
+            }
+            while ((double)nNumber + f > 2147483591.0)
+            {
+                BdCmplt("Число элементов, которые будут в массиве после добавления, превышает допустимое\nПовторите ввод.");
                 nNumber = GetNumber();
             }
             if (nNumber == 0)
             {
                 Console.Clear();
                 BdCmplt("Массив остаётся прежним. Ни один элемент не подлежит добавлению.\n");
+                return array;
             }
             else if (nNumber == 1)
             {
@@ -281,6 +318,12 @@ namespace lab5
                 BdCmplt("Повторите ввод");
                 columns = GetNumber();
             }
+            while (columns > 2147483591)
+            {
+                BdCmplt("Количество столбцов слишком велико");
+                BdCmplt("Повторите ввод");
+                columns = GetNumber();
+            }
             if (columns == 0)
             {
                 return array;
@@ -289,11 +332,20 @@ namespace lab5
             {
                 Console.WriteLine("Введите целое неотрицательное число - количество строк");
                 int strings = GetNumber();
+                double z = ((double)columns * (double)strings);
                 while (strings < 0)
                 {
                     BdCmplt("Количество строк не может быть меньше 0");
                     BdCmplt("Повторите ввод");
                     strings = GetNumber();
+                    z = ((double)columns * (double)strings);
+                }
+                while (z > 2147483591.0)
+                {
+                    BdCmplt("Число элементов, которое вы хотите задать, слишком велико");
+                    BdCmplt("Повторите ввод");
+                    strings = GetNumber();
+                    z = ((double)columns * (double)strings);
                 }
                 array = new int[strings, columns];
                 int i, j;
@@ -319,6 +371,12 @@ namespace lab5
                 BdCmplt("Повторите ввод");
                 strings = GetNumber();
             }
+            while (strings > 2147483591)
+            {
+                BdCmplt("Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его (<2147483592)");
+                BdCmplt("Повторите ввод");
+                strings = GetNumber();
+            }
             array = new int[strings][];
             if (strings == 0)
             {
@@ -326,17 +384,30 @@ namespace lab5
             }
             else 
             {
+                int k = 0;
                 for (int i = 0; i < strings; i++)
                 {
-
                     Console.WriteLine($"Введите количество столбцов строки {i + 1}");
                     int columns = GetNumber();
-                    while (columns < 1)
+                    while (columns < 0)
                     {
                         BdCmplt("Количество столбцов не может быть меньше 1");
                         BdCmplt("Повторите ввод");
                         columns = GetNumber();
                     }
+                    while (columns > 2147483591)
+                    {
+                        BdCmplt("Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его (<2147483592)");
+                        BdCmplt("Повторите ввод");
+                        columns = GetNumber();
+                    }
+                    while(k > 2147483591)
+                    {
+                        BdCmplt($"Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его\nВаше число элементов:{k}\nМаксимально допустимое число элементов: 2147483591\n Можно ввести элементов: {2147483591-k}");
+                        BdCmplt("Повторите ввод");
+                        columns = GetNumber();
+                    }
+                    k += columns;
                     array[i] = new int[columns];
                     for (int j = 0; j < columns; j++)
                     {
@@ -378,6 +449,12 @@ namespace lab5
                 BdCmplt("Повторите ввод");
                 columns = GetNumber();
             }
+            while (columns > 2147483591)
+            {
+                BdCmplt("Количество столбцов слишком велико");
+                BdCmplt("Повторите ввод");
+                columns = GetNumber();
+            }
             if (columns==0)
             {
                 return array;
@@ -386,11 +463,20 @@ namespace lab5
             {
                 Console.WriteLine("Введите целое неотрицательное число - количество строк");
                 int strings = GetNumber();
-                while (strings < 1)
+                double z = ((double)columns * (double)strings);
+                while (strings < 0)
                 {
-                    BdCmplt("Количество строк не может быть меньше 1");
+                    BdCmplt("Количество строк не может быть меньше 0");
                     BdCmplt("Повторите ввод");
                     strings = GetNumber();
+                    z = ((double)columns * (double)strings);
+                }
+                while (z > 2147483591.0)
+                {
+                    BdCmplt("Число элементов, которое вы хотите задать, слишком велико");
+                    BdCmplt("Повторите ввод");
+                    strings = GetNumber();
+                    z = ((double)columns * (double)strings);
                 }
                 array = new int[strings, columns];
                 int i, j;
@@ -417,6 +503,12 @@ namespace lab5
                 BdCmplt("Повторите ввод");
                 strings = GetNumber();
             }
+            while (strings > 2147483591)
+            {
+                BdCmplt("Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его (<2147483592)");
+                BdCmplt("Повторите ввод");
+                strings = GetNumber();
+            }
             if (strings == 0)
             {
                 int[][] jagArr = new int[strings][];
@@ -424,18 +516,32 @@ namespace lab5
             }
             else
             {
+                int k = 0;
                 array = new int[strings][];
                 for (int i = 0; i < strings; i++)
                 {
 
                     Console.WriteLine($"Введите количество столбцов строки {i + 1}");
                     int columns = GetNumber();
-                    while (columns < 1)
+                    while (columns < 0)
                     {
                         BdCmplt("Количество столбцов не может быть меньше 1");
                         BdCmplt("Повторите ввод");
                         columns = GetNumber();
                     }
+                    while (columns > 2147483591)
+                    {
+                        BdCmplt("Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его (<2147483592)");
+                        BdCmplt("Повторите ввод");
+                        columns = GetNumber();
+                    }
+                    while (k > 2147483591)
+                    {
+                        BdCmplt($"Число элементов, которое вы хотите задать, слишком велико. Попробуйте уменьшить его\nВаше число элементов:{k}\nМаксимально допустимое число элементов: 2147483591\n Можно ввести элементов: {2147483591 - k}");
+                        BdCmplt("Повторите ввод");
+                        columns = GetNumber();
+                    }
+                    k += columns;
                     array[i] = new int[columns];
                     for (int j = 0; j < columns; j++)
                     {
@@ -451,6 +557,11 @@ namespace lab5
         {
             if (array.Length == 0)
             {
+                return array;
+            }
+            else if (array.GetLength(0)==1)
+            {
+                BdCmplt("Не найдено ни одной чётной строки в массиве\nМассив остётся прежним.");
                 return array;
             }
             else
@@ -476,48 +587,95 @@ namespace lab5
                         rowsTmp++;
                     }
                 }
-                return arrayNew;
+                array = arrayNew;
+                return array;
             }
         }
         static int[][] ManualAddLastString(ref int[][]jagArr)
         {
-            int strings = jagArr.GetLength(0);
-            Array.Resize(ref jagArr, strings + 1);
-            Console.WriteLine($"Введите количество столбцов строки {strings+1}");
-            int columns = GetNumber();
-            while (columns < 1)
+            double z = 0;
+            for (int g = 0; g < jagArr.GetLength(0); g++)
             {
-                BdCmplt("Количество столбцов не может быть меньше 1");
-                BdCmplt("Повторите ввод");
-                columns = GetNumber();
+                for (int j = 0; j < jagArr[g].Length; j++)
+                {
+                    z++;
+                }
             }
-            jagArr[^1] = new int[columns];
-            for (int j = 0; j < columns; j++)
+            if (z < 2147483591.0)
             {
-                Console.WriteLine($"Введите число {j+1}");
-                jagArr[strings][j] = GetNumber();
+                int strings = jagArr.GetLength(0);
+                Array.Resize(ref jagArr, strings + 1);
+                Console.WriteLine($"Введите количество столбцов строки {strings + 1}");
+                int columns = GetNumber();
+                while (columns < 1)
+                {
+                    BdCmplt("Количество столбцов не может быть меньше 1");
+                    BdCmplt("Повторите ввод");
+                    columns = GetNumber();
+                }
+                while ((double)columns + z > 2147483591.0)
+                {
+                    BdCmplt("Число элементов, которое вы хотите ввести слишком большое.");
+                    BdCmplt("Повторите ввод");
+                    columns = GetNumber();
+                    z = (double)jagArr.Length + (double)columns;
+                }
+                jagArr[strings] = new int[columns];
+                for (int j = 0; j < columns; j++)
+                {
+                    Console.WriteLine($"Введите элемент [{strings + 1},{j + 1}]");
+                    jagArr[strings][j] = GetNumber();
+                }
+                return jagArr;
             }
-            return jagArr;
+            else
+            {
+                BdCmplt("Массив слишком велик, в него нельзя добавить строку\n");
+                return jagArr;
+            }
         }
         static int[][] AutoAddLastString(ref int[][]jagArr) 
         {
-            int strings = jagArr.GetLength(0);
-            Array.Resize(ref jagArr, strings+1);
-            Console.WriteLine($"Введите количество столбцов строки {strings + 1}");
-            int columns = GetNumber();
-            while (columns < 1)
+            double z = 0;
+            for (int g = 0; g< jagArr.GetLength(0); g++)
             {
-                BdCmplt("Количество столбцов не может быть меньше 1");
-                BdCmplt("Повторите ввод");
-                columns = GetNumber();
+                for (int j = 0;j < jagArr[g].Length; j++)
+                {
+                    z++;
+                }
             }
-            jagArr[strings] = new int[columns];
-            for (int j = 0; j < columns; j++)
+            if (z < 2147483591.0)
             {
-                Random rnd = new Random();
-                jagArr[strings][j] = rnd.Next(0, 100);
+                int strings = jagArr.GetLength(0);
+                Array.Resize(ref jagArr, strings + 1);
+                Console.WriteLine($"Введите количество столбцов строки {strings + 1}");
+                int columns = GetNumber();
+                while (columns < 1)
+                {
+                    BdCmplt("Количество столбцов не может быть меньше 1");
+                    BdCmplt("Повторите ввод");
+                    columns = GetNumber();
+                }
+                while ((double)columns + z > 2147483591.0)
+                {
+                    BdCmplt("Число элементов, которое вы хотите ввести слишком большое.");
+                    BdCmplt("Повторите ввод");
+                    columns = GetNumber();
+                    z = (double)jagArr.Length + (double)columns;
+                }
+                jagArr[strings] = new int[columns];
+                for (int j = 0; j < columns; j++)
+                {
+                    Random rnd = new Random();
+                    jagArr[strings][j] = rnd.Next(0, 100);
+                }
+                return jagArr;
             }
-            return jagArr;
+            else
+            {
+                BdCmplt("Массив слишком велик, в него нельзя добавить строку\n");
+                return jagArr;
+            }
         }
         /// <summary>
         /// Функция изменения цвета текста при успешном выполнении
