@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
@@ -65,10 +65,9 @@ namespace lab6._1
         static void StringMenu()
         {
             Title("╔═╗╔╦╗╦═╗╦╔╗╔╔═╗  ╔╦╗╔═╗╔╗╔╦ ╦\r\n╚═╗ ║ ╠╦╝║║║║║ ╦  ║║║║╣ ║║║║ ║\r\n╚═╝ ╩ ╩╚═╩╝╚╝╚═╝  ╩ ╩╚═╝╝╚╝╚═╝");
-            Console.WriteLine("1.Удаление всех слов, начинающихся и оканчивающихся на одну и ту же букву (Демо-режим)");
-            Console.WriteLine("2.Ввести строку и удалить из неё все слова, начинающиеся и оканчивающихся на одну и ту же букву");
-            Console.WriteLine("3.Очистить консоль");
-            Console.WriteLine("4.Выйти из подменю\n");
+            Console.WriteLine("1.Ввести строку и удалить из неё все слова, начинающиеся и оканчивающихся на одну и ту же букву");
+            Console.WriteLine("2.Очистить консоль");
+            Console.WriteLine("3.Выйти из подменю\n");
         }
         static void ExitMenu()
         {
@@ -88,19 +87,21 @@ namespace lab6._1
             inputStr = inputStr.Replace(".", ".+").Replace("!", "!+").Replace("?", "?+");
             bool ok = true;
             StringBuilder sb = new StringBuilder();
-            Regex sample = new Regex(@"^[А-Я][^.!?]*[.!?]$");
+            Regex sampleRu = new Regex(@"^[А-Я][^.!?]*[.!?]$");
+            Regex sampleEn = new Regex(@"^[A-Z][^.!?]*[.!?]$");
             string[] sentences = inputStr.Split("+");
             if (sentences[^1] == " " || sentences[^1] == "")
                 Array.Resize(ref sentences, sentences.Length - 1);
             for (int i = 0; i < sentences.Length; i++)
             {
                 string sentence = sentences[i].Trim();
-                if (sample.IsMatch(sentence) != true)
+                if (sampleRu.IsMatch(sentence) == true ^ sampleEn.IsMatch(sentence) != true)
                 {
                     ok = false;
+                    break;
                 }
             }
-            if (ok)
+            if (ok) 
                 return true;
             else
                 return false;
@@ -160,14 +161,22 @@ namespace lab6._1
                 else
                     sb.Append(tmp[i] + " ");
             }
-            string sbNew = sb.ToString().Replace(" ,", ",").Replace(" ;", ";").Replace(" :", ":").Replace(" .", ".").Replace(" ?", "?").Replace(" !", "!").Trim();
             text = text.Replace("+", "");
-            GdCmplt($"Изначальная строка: {text}");
-            GdCmplt($"Полученная строка: {sbNew}");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"Всего было удалено {countDeletedWords} слов: ");
-            Console.WriteLine("{0} \n", string.Join(", ", deletedWords));
-            Console.ResetColor();
+            if (countDeletedWords > 0)
+            {
+                string sbNew = sb.ToString().Replace(" ,", ",").Replace(" ;", ";").Replace(" :", ":").Replace(" .", ".").Replace(" ?", "?").Replace(" !", "!").Trim();
+                text = text.Replace("+", "");
+                GdCmplt($"Изначальная строка: {text}");
+                GdCmplt($"Полученная строка: {sbNew}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"Всего было удалено {countDeletedWords} слов: ");
+                Console.WriteLine("{0} \n", string.Join(", ", deletedWords));
+                Console.ResetColor();
+            }
+            else if (countDeletedWords == 0)
+            {
+                GdCmplt($"В предложении \"{text}\" не найдено ни одного слова для удаления.\n");
+            }
         }
         static void RemoveWord(string[] strings)
         {
@@ -233,7 +242,7 @@ namespace lab6._1
                         GdCmplt($"В предложении \"{text}\" не найдено ни одного слова для удаления.\n");
                     }
                 }
-                else if (!isCorrect) 
+                else if (!isCorrect || !isEmpty) 
                 {
                     inputStr = inputStr.Replace("+", "");
                     BdCmplt($"Предложение \"{inputStr}\" введено некорректно\n \a");
@@ -258,7 +267,7 @@ namespace lab6._1
                 {
                     BdCmplt("Предложение должно начинаться с заглавной буквы и оканчиваться знаком окончания предложения. Повторите ввод.\n \a");
                 }
-            } while (isCorrect == false);
+            } while (isCorrect == false || isEmpty == false);
             return inputStr;
         }
         static string GetFileLocation(string location = "../../../test.txt")
@@ -324,11 +333,6 @@ namespace lab6._1
                                 {
                                     case 1:
                                         {
-                                            RemoveWord(StringReader());
-                                            break;
-                                        }
-                                    case 2:
-                                        {
                                             Console.Clear();
                                             do
                                             {
@@ -363,12 +367,12 @@ namespace lab6._1
                                             } while (ans != 3);
                                             break;
                                         }
-                                    case 3:
+                                    case 2:
                                         {
                                             Console.Clear();
                                             break;
                                         }
-                                    case 4:
+                                    case 3:
                                         {
                                             Console.Clear();
                                             break;
@@ -380,7 +384,7 @@ namespace lab6._1
                                             break;
                                         }
                                 }
-                            } while (ans != 4);
+                            } while (ans != 3);
                             break;
                         }
                     case 2:
